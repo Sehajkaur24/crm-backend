@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 import bcrypt
 from jose import ExpiredSignatureError, JWTError, jwt
-from sqlalchemy import String
+from sqlalchemy import String, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.common.settings import settings
@@ -15,6 +15,8 @@ class User(Base):
     full_name: Mapped[str] = mapped_column(String)
     email: Mapped[str] = mapped_column(String, unique=True)
     password_hash: Mapped[str] = mapped_column(String)
+    user_type: Mapped[str] = mapped_column(String, default="employee")
+    organisation_id: Mapped[int] = mapped_column(ForeignKey("organisations.id"))
 
     @property
     def token(self):

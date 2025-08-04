@@ -1,10 +1,21 @@
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.database.models.user import User
-from app.exceptions.user_exception import UserAlreadyExistException
+from app.exceptions.user_exception import (
+    InvalidCredentialsException,
+    UserAlreadyExistException,
+    UserNotFoundException,
+)
 from app.repositories.organisation_repository import organisation_repo
 from app.repositories.user_repository import user_repo
 from app.schemas.organisation_schema import OrganisationCreate
-from app.schemas.user_schema import AdminCreateRequest, UserCreateWithHash
-from sqlalchemy.ext.asyncio import AsyncSession
+from app.schemas.user_schema import (
+    AdminCreateRequest,
+    TokenRequest,
+    TokenResponse,
+    UserCreateWithHash,
+    UserRead,
+)
 
 
 async def create_admin(db: AsyncSession, data: AdminCreateRequest) -> User:
@@ -28,3 +39,12 @@ async def create_admin(db: AsyncSession, data: AdminCreateRequest) -> User:
             organisation_id=org.id,
         ),
     )
+
+
+async def sign_in(db: AsyncSession, data: TokenRequest) -> TokenResponse:
+    user = await user_repo.get_by_attribute(db=db, attribute="email", value=data.email)
+    if not user:
+        raise UserNotFoundException(email=data.email)
+    if not user.verify_password(data.password):
+        raise InvalidCredentialsException()
+    return TokenResponse(user=UserRead.model_validate(user), access_token=user.token)

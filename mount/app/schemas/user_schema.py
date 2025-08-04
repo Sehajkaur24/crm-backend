@@ -6,6 +6,9 @@ class UserRead(DBBaseModel):
     full_name: str
     email: str
     password_hash: str
+    organisation_id: int
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserCreateRequest(BaseModel):
@@ -13,6 +16,10 @@ class UserCreateRequest(BaseModel):
     password: str = Field(..., examples=['topsecret'])
     user_type: str = Field(default="employee", examples=['user'])
 
+class EmployeeCreateRequest(BaseModel):
+    full_name: str = Field(..., examples=['John Doe'])
+    email: str = Field(..., examples=['john@example.com'])
+    password: str = Field(..., examples=['topsecret'])
 
 class UserCreateWithHash(BaseModel):
     full_name: str

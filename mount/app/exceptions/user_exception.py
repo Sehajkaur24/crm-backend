@@ -17,3 +17,13 @@ class UserAlreadyExistException(AppBaseException):
             error_code="USER_ALREADY_EXIST",
             detail=f"User with email {email} already exist"
         )
+
+
+class InvalidCredentialsException(AppBaseException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            error_code="INVALID_CREDENTIALS",
+            detail="Invalid email or password"
+        )
+    

@@ -7,6 +7,7 @@ class UserRead(DBBaseModel):
     email: str
     password_hash: str
     organisation_id: int
+    user_type: str
 
     model_config = ConfigDict(from_attributes=True)
 

@@ -8,6 +8,7 @@ from app.schemas.user_schema import (
     TokenResponse,
     UserRead,
 )
+from app.schemas.task_schema import TaskCreate, TaskRead
 from app.services import user_service
 
 router = APIRouter()
@@ -27,3 +28,25 @@ async def sign_in(db: AsyncSessionDep, data: TokenRequest):
 async def create_admin(db: AsyncSessionDep, data: AdminCreateRequest):
     user = await user_service.create_admin(db=db, data=data)
     return responses.success(data=user)
+
+
+@router.post(
+    "/users/create-task",
+    response_model=responses.ResponseModel[TaskRead],
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_user_task(db: AsyncSessionDep, data: TaskCreate):
+    task = await user_service.create_user_task(db=db, data=data)
+    return responses.success(data=task)
+
+
+@router.get("/users/{user_id}/tasks", response_model=responses.ResponseModel[list[TaskRead]])
+async def get_user_tasks(db: AsyncSessionDep, user_id: int):
+    tasks = await user_service.get_user_tasks(db=db, user_id=user_id)
+    return responses.success(data=tasks)
+
+
+@router.put("/users/{task_id}/tasks", response_model=responses.ResponseModel[TaskRead])
+async def update_user_task(db: AsyncSessionDep, task_id: int, data: TaskCreate):
+    task = await user_service.update_user_task(db=db, task_id=task_id, data=data)
+    return responses.success(data=task)

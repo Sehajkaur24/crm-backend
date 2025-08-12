@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import TIMESTAMP, text
+from sqlalchemy import TIMESTAMP
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -32,11 +32,11 @@ class Base(DeclarativeBase):
     id: Mapped[int] = mapped_column(primary_key=True)
 
     created_at: Mapped[datetime] = mapped_column(
-        TIMESTAMP, server_default=text("NOW()")
+        TIMESTAMP(timezone=True), default=datetime.now(timezone.utc)
     )
     updated_at: Mapped[datetime] = mapped_column(
-        TIMESTAMP,
-        server_default=text("NOW()"),
+        TIMESTAMP(timezone=True),
+        default=datetime.now(timezone.utc),
         onupdate=datetime.now(timezone.utc),
     )
 

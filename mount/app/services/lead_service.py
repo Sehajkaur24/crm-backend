@@ -1,11 +1,10 @@
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repositories.lead_repository import lead_repo
-from app.schemas.lead_schema import LeadCreateRequest, LeadRead, LeadCreate
-from sqlalchemy.ext.asyncio import AsyncSession
+from app.schemas.lead_schema import LeadCreate, LeadCreateRequest, LeadRead, LeadUpdate
 
 
 async def add_lead(db: AsyncSession, org_id: int, data: LeadCreateRequest) -> LeadRead:
-
     lead = await lead_repo.create(
         db=db,
         obj_in=LeadCreate(
@@ -26,3 +25,8 @@ async def get_organisation_leads(db: AsyncSession, org_id: int) -> list[LeadRead
         filters={"organisation_id": org_id},
     )
     return [LeadRead.model_validate(lead) for lead in leads]
+
+
+async def edit_lead(db: AsyncSession, lead_id: int, data: LeadUpdate) -> LeadRead:
+    lead = await lead_repo.update_by_id(db=db, id=lead_id, obj_in=data)
+    return LeadRead.model_validate(lead)

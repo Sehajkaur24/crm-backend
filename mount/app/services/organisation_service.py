@@ -1,11 +1,12 @@
+from asyncpg import Connection
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database.models.task import Task
 from app.database.models.user import User
 from app.exceptions.user_exception import UserAlreadyExistException
-from app.repositories.task_repository import task_repo
+from app.repos.task_repo import TaskRepo
 from app.repositories.user_repository import user_repo
 from app.schemas.user_schema import EmployeeCreateRequest, UserCreateWithHash, UserRead
+from app.repos.task_repo import TaskRead
 
 
 async def add_user_to_organisation(
@@ -39,6 +40,7 @@ async def get_organisation_users(db: AsyncSession, org_id: int) -> list[User]:
     return users
 
 
-async def get_organisation_tasks(db: AsyncSession, org_id: int) -> list[Task]:
-    tasks = await task_repo.get_multi_by_attribute(db=db, attribute="organisation_id", value=org_id)
+async def get_organisation_tasks(conn: Connection,org_id: int) -> list[TaskRead]:
+    task_repo = TaskRepo(conn=conn)
+    tasks = await task_repo.get_all_tasks_by_org_id(org_id=org_id)
     return tasks

@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from app.api import global_router
 from app.common.middlewares import init_middlewares
 from app.common.exception_handlers import init_exception_middlewares
-from app.database.core import get_db_engine
+from app.database.core import get_db_engine, get_connection_pool
 
 app_description = """
 A FastAPI-powered backend.
@@ -11,8 +11,10 @@ A FastAPI-powered backend.
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    app.state.pg_pool = await get_connection_pool()
     app.state.db_pool = get_db_engine()
     yield
+    await app.state.pg_pool.close()
     await app.state.db_pool.dispose()
 
 

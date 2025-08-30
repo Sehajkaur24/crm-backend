@@ -1,3 +1,4 @@
+from asyncpg import Connection
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.models.user import User
@@ -6,6 +7,7 @@ from app.exceptions.user_exception import (
     UserAlreadyExistException,
     UserNotFoundException,
 )
+from app.repos.task_repo import TaskCreate, TaskUpdate, TaskRead, TaskRepo
 from app.repositories.organisation_repository import organisation_repo
 from app.repositories.user_repository import user_repo
 from app.schemas.organisation_schema import OrganisationCreate
@@ -16,8 +18,6 @@ from app.schemas.user_schema import (
     UserCreateWithHash,
     UserRead,
 )
-from app.schemas.task_schema import TaskCreate, TaskRead
-from app.repositories.task_repository import task_repo
 
 
 async def create_admin(db: AsyncSession, data: AdminCreateRequest) -> User:
@@ -52,20 +52,21 @@ async def sign_in(db: AsyncSession, data: TokenRequest) -> TokenResponse:
     return TokenResponse(user=UserRead.model_validate(user), access_token=user.token)
 
 
-async def create_user_task(db: AsyncSession, data: TaskCreate) -> TaskRead:
-    user = await user_repo.get_by_attribute(db=db, attribute="id", value=data.user_id)
-    if not user:
-        raise UserNotFoundException(email=str(data.user_id))
-    task = await task_repo.create(db=db, obj_in=data)
+async def create_user_task(conn: Connection, data: TaskCreate) -> TaskRead | None:
+    task_repo = TaskRepo(conn)
+    task = await task_repo.create_task(data=data)
+    return task
 
+
+async def update_user_task(
+    conn: Connection, task_id: int, data: TaskUpdate
+) -> TaskRead:
+    task_repo = TaskRepo(conn)
+    task = await task_repo.edit_task(task_id=task_id, data=data)
     return TaskRead.model_validate(task)
 
-async def update_user_task(db: AsyncSession, task_id: int, data: TaskCreate) -> TaskRead:
-    task = await task_repo.update_by_id(db=db, id=task_id, obj_in=data)
-    return TaskRead.model_validate(task)
 
-async def get_user_tasks(db: AsyncSession, user_id: int) -> list[TaskRead]:
-    tasks = await task_repo.get_multi_by_attribute(db=db, attribute="user_id", value=user_id)
-    if not tasks:
-        return []
-    return [TaskRead.model_validate(task) for task in tasks]
+async def get_user_tasks(conn: Connection, user_id: int) -> list[TaskRead]:
+    task_repo = TaskRepo(conn)
+    tasks = await task_repo.get_user_tasks(user_id=user_id)
+    return tasks

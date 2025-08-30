@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+import asyncpg
 
 from sqlalchemy import TIMESTAMP
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
@@ -6,6 +7,8 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 from app.common.settings import settings
 
+async def get_connection_pool() -> asyncpg.Pool:
+    return await asyncpg.create_pool(settings.db_dsn)
 
 def get_db_engine() -> AsyncEngine:
     """Create an async SQLAlchemy engine from the configured database URL.

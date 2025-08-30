@@ -1,11 +1,12 @@
 from fastapi import APIRouter
 
+from app.api.models.lead_models import LeadCreateRequest
 from app.common import responses
-from app.dependencies.db_dependency import AsyncSessionDep
-from app.schemas.task_schema import TaskRead
+from app.dependencies.db_dependency import AsyncSessionDep, DBConnectionDep
+from app.repos.lead_repo import LeadRead
+from app.repos.task_repo import TaskRead
 from app.schemas.user_schema import EmployeeCreateRequest, UserRead
-from app.schemas.lead_schema import LeadCreateRequest, LeadRead
-from app.services import organisation_service, lead_service
+from app.services import lead_service, organisation_service
 
 router = APIRouter()
 
@@ -35,8 +36,8 @@ async def get_organisation_users(db: AsyncSessionDep, org_id: int):
     "/organisations/{org_id}/tasks",
     response_model=responses.ResponseModel[list[TaskRead]],
 )
-async def get_organisation_tasks(db: AsyncSessionDep, org_id: int):
-    res = await organisation_service.get_organisation_tasks(db=db, org_id=org_id)
+async def get_organisation_tasks(org_id: int, conn: DBConnectionDep):
+    res = await organisation_service.get_organisation_tasks(org_id=org_id, conn=conn)
     return responses.success(data=res)
 
 
@@ -44,11 +45,9 @@ async def get_organisation_tasks(db: AsyncSessionDep, org_id: int):
     "/organisations/{org_id}/leads", response_model=responses.ResponseModel[LeadRead]
 )
 async def add_lead_to_organisation(
-    data: LeadCreateRequest, db: AsyncSessionDep, org_id: int
+    data: LeadCreateRequest, conn: DBConnectionDep, org_id: int
 ):
-    res = await lead_service.add_lead(
-        db=db, org_id=org_id, data=data
-    )
+    res = await lead_service.add_lead(conn=conn, org_id=org_id, data=data)
     return responses.success(data=res)
 
 
@@ -56,6 +55,6 @@ async def add_lead_to_organisation(
     "/organisations/{org_id}/leads",
     response_model=responses.ResponseModel[list[LeadRead]],
 )
-async def get_organisation_leads(db: AsyncSessionDep, org_id: int):
-    res = await lead_service.get_organisation_leads(db=db, org_id=org_id)
+async def get_organisation_leads(org_id: int, conn: DBConnectionDep):
+    res = await lead_service.get_organisation_leads(conn=conn, org_id=org_id)
     return responses.success(data=res)

@@ -1,22 +1,18 @@
 from fastapi import APIRouter, status
 
+from app.api.models.user_models import AdminCreateRequest, TokenRequest, TokenResponse
 from app.common import responses
-from app.dependencies.db_dependency import AsyncSessionDep, DBConnectionDep
-from app.schemas.user_schema import (
-    AdminCreateRequest,
-    TokenRequest,
-    TokenResponse,
-    UserRead,
-)
+from app.dependencies.db_dependency import DBConnectionDep
 from app.repos.task_repo import TaskCreate, TaskRead, TaskUpdate
+from app.repos.user_repo import UserRead
 from app.services import user_service
 
 router = APIRouter()
 
 
 @router.post("/auth/sign-in", response_model=responses.ResponseModel[TokenResponse])
-async def sign_in(db: AsyncSessionDep, data: TokenRequest):
-    res = await user_service.sign_in(db=db, data=data)
+async def sign_in(conn: DBConnectionDep, data: TokenRequest):
+    res = await user_service.sign_in(conn=conn, data=data)
     return responses.success(data=res)
 
 
@@ -25,8 +21,8 @@ async def sign_in(db: AsyncSessionDep, data: TokenRequest):
     response_model=responses.ResponseModel[UserRead],
     status_code=status.HTTP_201_CREATED,
 )
-async def create_admin(db: AsyncSessionDep, data: AdminCreateRequest):
-    user = await user_service.create_admin(db=db, data=data)
+async def create_admin(conn: DBConnectionDep, data: AdminCreateRequest):
+    user = await user_service.create_admin(conn=conn, data=data)
     return responses.success(data=user)
 
 

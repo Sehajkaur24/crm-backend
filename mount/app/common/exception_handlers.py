@@ -1,11 +1,12 @@
 from fastapi import FastAPI, status
-from fastapi.requests import Request
-from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from fastapi.exceptions import HTTPException
+from fastapi.requests import Request
+from fastapi.responses import JSONResponse
+
+from app.common import responses
 from app.common.logger import logger
 from app.exceptions.base_exception import AppBaseException
-from app.common import responses
 
 
 def init_exception_middlewares(app: FastAPI):

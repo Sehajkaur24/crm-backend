@@ -1,6 +1,7 @@
 from asyncpg import Connection
-from pydantic import BaseModel, ConfigDict
-from app.schemas.base_schema import DBBaseModel
+from pydantic import BaseModel
+
+from app.common.base_models import DBBaseModel
 
 
 class TaskBase(BaseModel):
@@ -12,7 +13,7 @@ class TaskBase(BaseModel):
 
 
 class TaskRead(TaskBase, DBBaseModel):
-    model_config = ConfigDict(from_attributes=True)
+    pass
 
 
 class TaskCreate(TaskBase):

@@ -1,7 +1,9 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from app.common.settings import settings
+
 from app.common.logger import logger
+from app.common.settings import settings
+
 
 def init_middlewares(app: FastAPI):
     """
@@ -17,7 +19,7 @@ def init_middlewares(app: FastAPI):
         logger.info(f"{request.method} {request.url}")
         response = await call_next(request)
         return response
-    
+
     if settings.crm_environment == "dev":
         # Allow all origins in development
         app.add_middleware(

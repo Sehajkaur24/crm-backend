@@ -1,7 +1,7 @@
 from asyncpg import Connection
 from pydantic import BaseModel
-from app.schemas.base_schema import DBBaseModel
-from pydantic import ConfigDict
+
+from app.common.base_models import DBBaseModel
 
 
 class LeadBase(BaseModel):
@@ -21,7 +21,7 @@ class LeadUpdate(LeadBase):
 
 
 class LeadRead(LeadBase, DBBaseModel):
-    model_config = ConfigDict(from_attributes=True)
+    pass
 
 
 class LeadRepo:

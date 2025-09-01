@@ -47,6 +47,17 @@ class EventRepo:
         recs = await self.conn.fetch(query, *params)
         return EventRead(**recs[0]) if recs else None
     
+    async def edit_event(self, event_id: int, data: EventUpdate) -> EventRead | None:
+        params = [data.title, data.date, data.location, data.status, data.organisation_id, event_id]
+        query = f"""
+        UPDATE events
+        SET title = $1, date = $2, location = $3, status = $4, organisation_id = $5, updated_at = NOW()
+        WHERE id = $6
+        RETURNING {self.READ_PARAMS}
+        """
+        recs = await self.conn.fetch(query, *params)
+        return EventRead(**recs[0]) if recs else None
+    
     async def get_events_by_org_id(self, org_id: int) -> list[EventRead]:
         query = self._base_read() + " WHERE organisation_id = $1"
         recs = await self.conn.fetch(query, org_id)

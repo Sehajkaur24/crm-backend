@@ -1,7 +1,8 @@
 from asyncpg import Connection
-from app.repos.event_repo import EventCreate, EventRead, EventRepo, EventUpdate
+
 from app.api.models.event_model import EventCreateRequest
 from app.exceptions.event_exception import EventException
+from app.repos.event_repo import EventCreate, EventRead, EventRepo, EventUpdate
 
 
 async def create_event(
@@ -24,6 +25,7 @@ async def get_events_by_org_id(conn: Connection, org_id: int) -> list[EventRead]
     event_repo = EventRepo(conn)
     events = await event_repo.get_events_by_org_id(org_id=org_id)
     return events
+
 
 async def edit_event(conn: Connection, event_id: int, data: EventUpdate) -> EventRead:
     event_repo = EventRepo(conn)

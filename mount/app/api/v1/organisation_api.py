@@ -2,15 +2,18 @@ from fastapi import APIRouter
 
 from app.api.models.event_model import EventCreateRequest
 from app.api.models.lead_models import LeadCreateRequest
+from app.api.models.opportunity_model import OpportunityCreateRequest
 from app.api.models.user_models import EmployeeCreateRequest
 from app.common import responses
 from app.dependencies.db_dependency import DBConnectionDep
 from app.repos.event_repo import EventRead
 from app.repos.lead_repo import LeadRead
+from app.repos.opportunity_repo import OpportunityRead
 from app.repos.task_repo import TaskRead
 from app.repos.user_repo import UserRead
 from app.services import lead_service, organisation_service
 from app.services import event_service
+from app.services import opportunity_service
 
 router = APIRouter()
 
@@ -63,6 +66,7 @@ async def get_organisation_leads(org_id: int, conn: DBConnectionDep):
     res = await lead_service.get_organisation_leads(conn=conn, org_id=org_id)
     return responses.success(data=res)
 
+
 @router.get(
     "/organisations/{org_id}/events",
     response_model=responses.ResponseModel[list[EventRead]],
@@ -71,6 +75,7 @@ async def get_organisation_events(org_id: int, conn: DBConnectionDep):
     res = await event_service.get_events_by_org_id(conn=conn, org_id=org_id)
     return responses.success(data=res)
 
+
 @router.post(
     "/organisations/{org_id}/events", response_model=responses.ResponseModel[EventRead]
 )
@@ -78,4 +83,26 @@ async def add_event_to_organisation(
     data: EventCreateRequest, conn: DBConnectionDep, org_id: int
 ):
     res = await event_service.create_event(conn=conn, org_id=org_id, data=data)
+    return responses.success(data=res)
+
+
+@router.post(
+    "/organisations/{org_id}/opportunities",
+    response_model=responses.ResponseModel[OpportunityRead],
+)
+async def add_opportunity_to_organisation(
+    data: OpportunityCreateRequest, conn: DBConnectionDep, org_id: int
+):
+    res = await opportunity_service.create_opportunity(
+        conn=conn, org_id=org_id, data=data
+    )
+    return responses.success(data=res)
+
+
+@router.get(
+    "/organisations/{org_id}/opportunities",
+    response_model=responses.ResponseModel[list[OpportunityRead]],
+)
+async def get_organisation_opportunities(org_id: int, conn: DBConnectionDep):
+    res = await opportunity_service.get_by_org_id(conn=conn, org_id=org_id)
     return responses.success(data=res)

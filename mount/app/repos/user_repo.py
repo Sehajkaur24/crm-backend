@@ -18,10 +18,8 @@ class UserBase(BaseModel):
     user_type: UserType
     organisation_id: int
 
-
 class UserRead(UserBase, DBBaseModel):
     pass
-
 
 class UserCreate(UserBase):
     pass
@@ -57,8 +55,33 @@ class UserRepo:
         query = self._base_read() + " WHERE email = $1"
         recs = await self.conn.fetch(query, email)
         return UserRead(**recs[0]) if recs else None
+    
+    async def get_by_id(self, user_id: int) -> UserRead | None:
+        query = self._base_read() + " WHERE id = $1"
+        recs = await self.conn.fetch(query, user_id)
+        return UserRead(**recs[0]) if recs else None
 
     async def get_org_employees(self, org_id: int) -> list[UserRead]:
         query = self._base_read() + " WHERE organisation_id = $1 AND user_type = $2"
         recs = await self.conn.fetch(query, org_id, UserType.EMPLOYEE.value)
         return [UserRead(**rec) for rec in recs]
+    
+    async def update_profile(self, user_id: int, full_name: str, email: str) -> UserRead | None:
+        query= f"""
+        UPDATE {self.TABLE_NAME}
+        SET full_name = $1, email = $2
+        WHERE id = $3
+        RETURNING {self.READ_PARAMS}
+        """
+        recs = await self.conn.fetch(query, full_name, email, user_id)
+        return UserRead(**recs[0]) if recs else None
+    
+    async def change_password(self, user_id: int, new_password: str) -> UserRead | None: 
+        query= f"""
+        UPDATE {self.TABLE_NAME}
+        SET password_hash = $1
+        WHERE id = $2
+        RETURNING {self.READ_PARAMS}
+        """
+        recs = await self.conn.fetch(query, new_password, user_id)
+        return UserRead(**recs[0]) if recs else None

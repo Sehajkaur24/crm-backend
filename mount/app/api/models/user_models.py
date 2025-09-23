@@ -39,3 +39,12 @@ class AdminCreateRequest(BaseModel):
     password: str = Field(..., examples=["topsecret"])
     org_name: str = Field(..., examples=["My Organization"])
     industry: str = Field(..., examples=["IT"])
+
+
+class UpdateProfileRequest(BaseModel):
+    full_name: str = Field(..., examples=["John Doe"])
+    email: str = Field(..., examples=["john@example.com"])
+
+class ChangePasswordRequest(BaseModel):
+    old_password: str = Field(..., examples=["oldpassword"])
+    new_password: str = Field(..., examples=["newpassword"])

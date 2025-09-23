@@ -10,10 +10,14 @@ from app.api.models.user_models import TokenResponse
 from app.api.models.user_models import (
     AdminCreateRequest,
     TokenRequest,
+    UpdateProfileRequest,
+    ChangePasswordRequest
 )
 from app.repos.organisation_repo import OrganisationRepo, OrganisationCreate
 from app.repos.user_repo import UserCreate, UserRepo, UserRead, UserType
 from app.common.security import create_token, hash_password, verify_password
+
+
 
 
 async def create_admin(conn: Connection, data: AdminCreateRequest) -> UserRead:
@@ -70,3 +74,25 @@ async def get_user_tasks(conn: Connection, user_id: int) -> list[TaskRead]:
     task_repo = TaskRepo(conn)
     tasks = await task_repo.get_user_tasks(user_id=user_id)
     return tasks
+
+
+async def update_profile(conn: Connection, data: UpdateProfileRequest, user_id:int) ->  UserRead | None:
+    user_repo=UserRepo(conn)
+    user_repo= await user_repo.update_profile(full_name=data.full_name,email=data.email,user_id=user_id)
+    return user_repo
+
+
+async def change_password(conn: Connection, data: ChangePasswordRequest, user_id: int) -> UserRead:
+    user_repo = UserRepo(conn)
+    user = await user_repo.get_by_id(user_id=user_id)
+    if not user:
+        raise UserNotFoundException(f"User with id {user_id} not found.")
+
+    if not verify_password(password=data.old_password, password_hash=user.password_hash):
+        raise InvalidCredentialsException()
+
+    hashed_new_password = hash_password(data.new_password)
+    updated_user = await user_repo.change_password(
+        user_id=user_id, new_password=hashed_new_password
+    )
+    return updated_user

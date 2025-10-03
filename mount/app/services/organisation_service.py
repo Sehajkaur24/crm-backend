@@ -4,6 +4,8 @@ from app.exceptions.user_exception import UserAlreadyExistException
 from app.repos.task_repo import TaskRepo
 from app.repos.user_repo import UserRepo, UserRead, UserCreate, UserType
 from app.api.models.user_models import EmployeeCreateRequest
+from app.repos.organisation_repo import OrganisationRepo
+from app.api.models.user_models import UpdateOrganisationRequest
 from app.repos.task_repo import TaskRead
 from app.common.security import hash_password
 
@@ -39,3 +41,8 @@ async def get_organisation_tasks(conn: Connection,org_id: int) -> list[TaskRead]
     task_repo = TaskRepo(conn=conn)
     tasks = await task_repo.get_all_tasks_by_org_id(org_id=org_id)
     return tasks
+
+async def update_organisation(conn: Connection, data: UpdateOrganisationRequest, org_id:int) ->  UserRead | None:
+    org_repo=OrganisationRepo(conn)
+    org_repo= await org_repo.update_organisation(name=data.name,org_id=org_id)
+    return org_repo

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status
 
-from app.api.models.user_models import AdminCreateRequest, TokenRequest, TokenResponse, UpdateProfileRequest,ChangePasswordRequest
+from app.api.models.user_models import AdminCreateRequest, TokenRequest, TokenResponse, UpdateProfileRequest,ChangePasswordRequest, UpdateOrganisationRequest, UpdateAdminRequest 
 from app.common import responses
 from app.dependencies.db_dependency import DBConnectionDep
 from app.repos.task_repo import TaskCreate, TaskRead, TaskUpdate
@@ -58,3 +58,9 @@ async def update_profile(conn: DBConnectionDep, user_id:int, data: UpdateProfile
 async def change_password(conn: DBConnectionDep, user_id:int, data: ChangePasswordRequest):
     user= await user_service.change_password(conn=conn, data=data,user_id=user_id)
     return responses.success(data=user)
+
+@router.put('/users/{admin_id}/update-admin', response_model=responses.ResponseModel[UserRead])
+async def update_admin(conn: DBConnectionDep, admin_id:int, data: UpdateAdminRequest):
+    user= await user_service.update_admin(conn=conn, data=data,admin_id=admin_id)
+    return responses.success(data=user)
+

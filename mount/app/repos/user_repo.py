@@ -85,3 +85,16 @@ class UserRepo:
         """
         recs = await self.conn.fetch(query, new_password, user_id)
         return UserRead(**recs[0]) if recs else None
+    
+    
+    async def update_admin(self, admin_id: int, full_name: str, email: str) -> UserRead | None:
+        query= f"""
+        UPDATE {self.TABLE_NAME}
+        SET full_name = $1, email = $2
+        WHERE id = $3 AND user_type = $4
+        RETURNING {self.READ_PARAMS}
+        """
+        recs = await self.conn.fetch(query, full_name, email, admin_id, UserType.ADMIN.value)
+        return UserRead(**recs[0]) if recs else None
+    
+    

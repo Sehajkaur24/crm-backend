@@ -4,6 +4,7 @@ from app.api.models.event_model import EventCreateRequest
 from app.api.models.lead_models import LeadCreateRequest
 from app.api.models.opportunity_model import OpportunityCreateRequest
 from app.api.models.user_models import EmployeeCreateRequest
+from app.api.models.user_models import UpdateOrganisationRequest
 from app.common import responses
 from app.dependencies.db_dependency import DBConnectionDep
 from app.repos.event_repo import EventRead
@@ -14,6 +15,7 @@ from app.repos.user_repo import UserRead
 from app.services import lead_service, organisation_service
 from app.services import event_service
 from app.services import opportunity_service
+from app.repos.organisation_repo import OrganisationRead
 
 router = APIRouter()
 
@@ -106,3 +108,12 @@ async def add_opportunity_to_organisation(
 async def get_organisation_opportunities(org_id: int, conn: DBConnectionDep):
     res = await opportunity_service.get_by_org_id(conn=conn, org_id=org_id)
     return responses.success(data=res)
+
+
+@router.put(
+    "/organisations/{org_id}/update-organisation",
+    response_model=responses.ResponseModel[OrganisationRead],
+)
+async def update_organisation(conn: DBConnectionDep, org_id: int, data: UpdateOrganisationRequest):
+    org = await organisation_service.update_organisation(conn=conn, data=data, org_id=org_id)
+    return responses.success(data=org)

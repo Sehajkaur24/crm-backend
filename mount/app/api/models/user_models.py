@@ -48,3 +48,20 @@ class UpdateProfileRequest(BaseModel):
 class ChangePasswordRequest(BaseModel):
     old_password: str = Field(..., examples=["oldpassword"])
     new_password: str = Field(..., examples=["newpassword"])
+
+class UpdateOrganisationRequest(BaseModel):
+    name: str = Field(..., examples=["My Organization"])
+
+class UpdateAdminRequest(BaseModel):
+    full_name: str = Field(..., examples=["John Doe"])
+    email: str = Field(..., examples=["john@example.com"])
+
+class TotalUsersResponse(BaseModel):
+    total_users: int
+
+
+
+
+
+
+

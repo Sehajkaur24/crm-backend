@@ -1,6 +1,7 @@
 from asyncpg import Connection
 from pydantic import BaseModel, ConfigDict
 
+
 from app.common.base_models import DBBaseModel
 
 
@@ -40,3 +41,13 @@ class OrganisationRepo:
         """
         recs = await self.conn.fetch(query, *params)
         return OrganisationRead(**recs[0])
+    
+    async def update_organisation(self, name: str, org_id:int) -> OrganisationRead | None:
+        query = f"""
+        UPDATE organisations
+        SET name = $1, updated_at = NOW()
+        WHERE id = $2
+        RETURNING {self.READ_PARAMS}
+        """
+        recs = await self.conn.fetch(query, name, org_id)
+        return OrganisationRead(**recs[0]) if recs else None
